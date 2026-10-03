@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Number Guessing Game</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --success: #16a34a;
+      --warning: #ea580c;
+      --info: #0284c7;
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      max-width: 520px;
+      width: 100%;
+      padding: 28px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      text-align: center;
+      margin-bottom: 8px;
+      color: #818cf8;
+      background: linear-gradient(to right, #818cf8, #c084fc);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+
+    p.subtitle {
+      color: var(--text-muted);
+      text-align: center;
+      font-size: 0.95rem;
+      margin-bottom: 24px;
+    }
+
+    .section-title {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .presets-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .btn {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #273549;
+      color: var(--text);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      background: #334155;
+      border-color: #64748b;
+    }
+
+    .btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .custom-range {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+
+    .input-field {
+      flex: 1;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #0f172a;
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 1rem;
+      outline: none;
+    }
+
+    .input-field:focus {
+      border-color: var(--primary);
+    }
+
+    .btn-primary {
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .game-area {
+      display: none;
+      margin-top: 24px;
+      border-top: 1px solid var(--border);
+      padding-top: 20px;
+    }
+
+    .stats-bar {
+      display: flex;
+      justify-content: space-between;
+      background: #0f172a;
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      font-size: 0.95rem;
+    }
+
+    .guess-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .guess-row input {
+      flex: 1;
+      font-size: 1.2rem;
+      text-align: center;
+    }
+
+    .guess-row button {
+      flex: 0.6;
+    }
+
+    .feedback-box {
+      display: none;
+      padding: 14px 18px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      text-align: center;
+      font-weight: 600;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .feedback-box.TOO_LOW {
+      background: rgba(2, 132, 199, 0.15);
+      border: 1px solid var(--info);
+      color: #38bdf8;
+    }
+
+    .feedback-box.TOO_HIGH {
+      background: rgba(234, 88, 12, 0.15);
+      border: 1px solid var(--warning);
+      color: #fb923c;
+    }
+
+    .feedback-box.SUCCESS {
+      background: rgba(22, 163, 74, 0.2);
+      border: 1px solid var(--success);
+      color: #4ade80;
+    }
+
+    .history-card {
+      background: #0f172a;
+      border-radius: 10px;
+      padding: 14px;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    .history-card h3 {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .history-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+      padding: 6px 10px;
+      background: #1e293b;
+      border-radius: 6px;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    .badge.TOO_LOW { background: #0369a1; color: white; }
+    .badge.TOO_HIGH { background: #c2410c; color: white; }
+    .badge.SUCCESS { background: #15803d; color: white; }
+
+    .reset-btn {
+      margin-top: 14px;
+      background: transparent;
+      border: 1px dashed var(--border);
+      color: var(--text-muted);
+      width: 100%;
+    }
+    .reset-btn:hover {
+      color: var(--text);
+      border-color: #64748b;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>🎯 Number Guessing Game</h1>
+    <p class="subtitle">FastAPI & Python Powered Backend</p>
+
+    <!-- Range Selection View -->
+    <div id="setup-view">
+      <div class="section-title">1. Select Range</div>
+      <div class="presets-grid">
+        <button type="button" class="btn active" onclick="setPreset(1, 10, this)">1 to 10</button>
+        <button type="button" class="btn" onclick="setPreset(1, 20, this)">1 to 20</button>
+        <button type="button" class="btn" onclick="setPreset(1, 100, this)">1 to 100</button>
+      </div>
+
+      <div class="section-title">Or Custom Range</div>
+      <div class="custom-range">
+        <input type="number" id="min-input" class="input-field" placeholder="Min" value="1">
+        <span style="color: var(--text-muted)">to</span>
+        <input type="number" id="max-input" class="input-field" placeholder="Max" value="10">
+      </div>
+
+      <button id="start-btn" class="btn btn-primary" onclick="startGame()">Start New Game 🚀</button>
+    </div>
+
+    <!-- Active Game View -->
+    <div id="game-view" class="game-area">
+      <div class="stats-bar">
+        <div>Range: <strong id="display-range">1 - 10</strong></div>
+        <div>Attempts: <strong id="attempt-counter">0</strong></div>
+      </div>
+
+      <div class="guess-row">
+        <input type="number" id="guess-input" class="input-field" placeholder="Enter guess" autofocus>
+        <button id="guess-btn" class="btn btn-primary" onclick="submitGuess()">Guess</button>
+      </div>
+
+      <div id="feedback" class="feedback-box"></div>
+
+      <div class="history-card" id="history-container" style="display: none;">
+        <h3>Guess History</h3>
+        <ul id="history-list" class="history-list"></ul>
+      </div>
+
+      <button class="btn reset-btn" onclick="resetToSetup()">🔄 Change Range / Restart</button>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = "http://127.0.0.1:8000";
+    let currentGameId = null;
+
+    function setPreset(min, max, buttonElement) {
+      document.querySelectorAll('.presets-grid .btn').forEach(btn => btn.classList.remove('active'));
+      if (buttonElement) buttonElement.classList.add('active');
+      document.getElementById('min-input').value = min;
+      document.getElementById('max-input').value = max;
+    }
+
+    async function startGame() {
+      const minVal = parseInt(document.getElementById('min-input').value, 10);
+      const maxVal = parseInt(document.getElementById('max-input').value, 10);
+
+      if (isNaN(minVal) || isNaN(maxVal) || minVal >= maxVal) {
+        alert("Please enter a valid range where Min is less than Max!");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/game/start`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ min_range: minVal, max_range: maxVal })
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          alert(err.detail || "Failed to start game");
+          return;
+        }
+
+        const data = await res.json();
+        currentGameId = data.game_id;
+
+        // Switch to game view
+        document.getElementById('setup-view').style.display = 'none';
+        document.getElementById('game-view').style.display = 'block';
+        document.getElementById('display-range').textContent = `${data.min_range} - ${data.max_range}`;
+        document.getElementById('attempt-counter').textContent = '0';
+        document.getElementById('feedback').style.display = 'none';
+        document.getElementById('history-list').innerHTML = '';
+        document.getElementById('history-container').style.display = 'none';
+        document.getElementById('guess-input').value = '';
+        document.getElementById('guess-input').disabled = false;
+        document.getElementById('guess-btn').disabled = false;
+        document.getElementById('guess-input').focus();
+      } catch (err) {
+        alert("Could not connect to FastAPI server. Make sure it is running on http://127.0.0.1:8000");
+      }
+    }
+
+    async function submitGuess() {
+      const input = document.getElementById('guess-input');
+      const val = parseInt(input.value, 10);
+
+      if (isNaN(val)) {
+        alert("Please enter a number!");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/game/guess`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ game_id: currentGameId, guess: val })
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          alert(err.detail || "Error submitting guess");
+          return;
+        }
+
+        const data = await res.json();
+
+        // Update attempts counter
+        document.getElementById('attempt-counter').textContent = data.attempts;
+
+        // Update feedback
+        const feedback = document.getElementById('feedback');
+        feedback.className = `feedback-box ${data.result}`;
+        feedback.textContent = data.message;
+        feedback.style.display = 'block';
+
+        // Add to history
+        const historyContainer = document.getElementById('history-container');
+        const historyList = document.getElementById('history-list');
+        historyContainer.style.display = 'block';
+
+        const li = document.createElement('li');
+        li.className = 'history-item';
+        li.innerHTML = `
+          <span>#${data.attempts} Guess: <strong>${data.guess}</strong></span>
+          <span class="badge ${data.result}">${data.result.replace('_', ' ')}</span>
+        `;
+        historyList.prepend(li);
+
+        // If game over
+        if (data.is_game_over) {
+          input.disabled = true;
+          document.getElementById('guess-btn').disabled = true;
+        } else {
+          input.value = '';
+          input.focus();
+        }
+      } catch (err) {
+        alert("Failed to reach server: " + err.message);
+      }
+    }
+
+    // Submit on Enter key
+    document.getElementById('guess-input').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        submitGuess();
+      }
+    });
+
+    function resetToSetup() {
+      document.getElementById('setup-view').style.display = 'block';
+      document.getElementById('game-view').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
